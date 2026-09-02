@@ -1,0 +1,325 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --transition-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slower: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0F1411;
+}
+
+::selection {
+  background: #7c2638;
+  color: #f1ebdd;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0f1411;
+}
+::-webkit-scrollbar-thumb {
+  background: #7c2638;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9a3548;
+}
+
+/* Section rhythm shared across the public site */
+.section {
+  padding: clamp(4rem, 9vw, 7.5rem) 0;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+}
+
+.section-inner {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 clamp(1.25rem, 8vw, 10rem);
+}
+
+.section-tag {
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  color: #baa36a;
+  font-weight: 600;
+}
+
+.section-title {
+  font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 0.35rem;
+  color: #f1ebdd;
+}
+
+.section-line {
+  width: 42px;
+  height: 2px;
+  background: linear-gradient(90deg, #7c2638, #7c2638 50%, transparent);
+  margin-top: 1rem;
+  border-radius: 2px;
+}
+
+/* Reveal-on-scroll utility with staggered animations */
+[data-reveal],
+[data-animate] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+[data-reveal].is-visible,
+[data-animate].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-animate] {
+    transition: none;
+  }
+}
+
+/* Premium glass surface with enhanced visuals */
+.glass-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(29, 38, 32, 0.55),
+    rgba(22, 29, 25, 0.45)
+  );
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(186, 163, 106, 0.18);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-smooth);
+}
+
+.glass-panel.fixed {
+  position: fixed;
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(186, 163, 106, 0.05),
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.glass-panel:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(29, 38, 32, 0.65),
+    rgba(22, 29, 25, 0.50)
+  );
+  box-shadow: 0 8px 32px rgba(186, 163, 106, 0.08);
+}
+
+/* Animations */
+@keyframes ambientGlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 1.15;
+  }
+}
+
+@keyframes subtleShift {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.nav-link.active {
+  color: #baa36a;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.certificate-expand {
+  animation: certificateExpand 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes certificateExpand {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Hero signature entrance — name wipe-reveal
+   Runs once on mount (not scroll-gated, since the hero is above the fold).
+   Total sequence lands within ~1.2s together with the existing
+   [data-animate] stagger below it.
+--------------------------------------------------------------------- */
+.hero-name {
+  display: block;
+  min-height: 1.86em;
+}
+
+.hero-cursor {
+  display: inline-block;
+  width: 0.07em;
+  height: 0.82em;
+  margin-left: 0.12em;
+  vertical-align: -0.04em;
+  background: #baa36a;
+  animation: cursorBlink 0.85s steps(1) infinite;
+  transition: opacity 0.5s ease;
+}
+
+@keyframes cursorBlink {
+  0%, 45% { opacity: 1; }
+  46%, 100% { opacity: 0; }
+}
+
+.hero-cursor-done {
+  opacity: 0.35;
+  animation-duration: 1.4s;
+}
+
+.hero-content-reveal {
+  animation: heroContentIn 0.7s 0.82s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes heroContentIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-eyebrow-reveal {
+  animation: heroEyebrowIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes heroEyebrowIn {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.05em;
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0.25em;
+  }
+}
+
+.portrait-entrance {
+  animation: portraitIn 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.8s;
+}
+
+@keyframes portraitIn {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+    filter: brightness(0.6) saturate(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .certificate-expand {
+    animation: none !important;
+  }
+
+  .hero-cursor,
+  .hero-content-reveal,
+  .hero-eyebrow-reveal,
+  .portrait-entrance {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Certificate "document" presentation
+--------------------------------------------------------------------- */
+.cert-document {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(186, 163, 106, 0.07), transparent 55%),
+    linear-gradient(150deg, #1b2420 0%, #141a16 100%);
+  border: 1px solid rgba(186, 163, 106, 0.16);
+}
+
+.cert-document::before,
+.cert-document::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: rgba(186, 163, 106, 0.35);
+  pointer-events: none;
+}
+
+.cert-document::before {
+  top: 10px;
+  left: 10px;
+  border-top: 1.5px solid;
+  border-left: 1.5px solid;
+}
+
+.cert-document::after {
+  bottom: 10px;
+  right: 10px;
+  border-bottom: 1.5px solid;
+  border-right: 1.5px solid;
+}
+
+.cert-seal {
+  background: radial-gradient(circle at 35% 30%, rgba(186, 163, 106, 0.35), rgba(122, 38, 56, 0.18) 70%);
+  border: 1px solid rgba(186, 163, 106, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
