@@ -120,8 +120,9 @@ tests are later implementation work. Do not deploy without the owner's approval.
 - [ ] Before launch, configure Supabase Auth password strength to require at least
       16 characters plus lowercase, uppercase, digits and symbols. The UI mirrors
       these rules, but Supabase Auth must enforce them server-side.
-- [ ] Add the exact production and preview callback URLs ending in
-      `/auth/callback` to Supabase Auth's redirect URL allowlist, then test recovery.
+- [ ] Add `https://about.samtumusime49.workers.dev/auth/callback` to Supabase
+      Auth's redirect URL allowlist. Add any actual preview callback URLs only
+      if preview deployments will be used, then test recovery.
 - [ ] Run the production build and complete login, recovery, password-change,
       unauthorized-user and public-content smoke tests before merging/deploying.
 - [x] The live contact inbox has no public read policy; anti-spam/rate limits
