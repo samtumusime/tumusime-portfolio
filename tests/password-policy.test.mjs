@@ -31,8 +31,9 @@ test('does not treat whitespace or emoji as a configured symbol', () => {
   assert.equal(result.symbol, false);
 });
 
-test('accepts Supabase-supported punctuation and symbol characters', () => {
-  for (const symbol of Array.from("!@#$%^&*()_+-=[]{};':\\"|<>?,./`~")) {
+test('accepts the symbol characters configured by Supabase Auth', () => {
+  const symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=', '[', ']', '{', '}', ';', "'", ':', '"', '|', '<', '>', '?', ',', '.', '/', '`', '~', '\\\\'];
+  for (const symbol of symbols) {
     assert.equal(isPasswordPolicySatisfied(`LongEnoughPassword7${symbol}`), true, `symbol ${symbol}`);
   }
 });
