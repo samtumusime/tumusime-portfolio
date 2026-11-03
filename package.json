@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:auth": "node --test tests/auth-redirect.test.mjs tests/password-policy.test.mjs tests/auth-rate-limit.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

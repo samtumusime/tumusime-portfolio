@@ -159,13 +159,27 @@ create index if not exists idx_messages_created on messages (created_at desc);
 
 -- ---------------------------------------------------------------------
 -- Row Level Security
--- Public (anon) role: read-only, and only rows marked published.
--- Authenticated role: full read/write. The admin dashboard signs in with
--- Supabase Auth, so "authenticated" effectively means "the admin", since
--- this project only ever creates one auth user (see ADMIN_EMAIL).
--- Contact messages: anyone can INSERT (submit the form), only the admin
--- can SELECT/UPDATE/DELETE (read/manage) them.
+-- Public visitors may read public/published content and submit contact
+-- messages. CMS access is bound to this project's single owner Auth UID.
+-- Keep this UUID in sync with server-side ADMIN_USER_ID.
 -- ---------------------------------------------------------------------
+
+create schema if not exists portfolio_private;
+revoke all on schema portfolio_private from public;
+grant usage on schema portfolio_private to anon, authenticated;
+
+create or replace function portfolio_private.is_portfolio_admin()
+returns boolean
+language sql
+stable
+security invoker
+set search_path = pg_catalog
+as $$
+  select auth.uid() = 'bf61502c-268f-43d9-bd8f-641758660adc'::uuid;
+$$;
+
+revoke all on function portfolio_private.is_portfolio_admin() from public;
+grant execute on function portfolio_private.is_portfolio_admin() to anon, authenticated;
 
 alter table profiles enable row level security;
 alter table skill_groups enable row level security;
@@ -179,61 +193,61 @@ alter table media enable row level security;
 
 -- profiles
 drop policy if exists "public read profiles" on profiles;
-create policy "public read profiles" on profiles for select using (true);
+create policy "public read profiles" on profiles for select to anon, authenticated using (true);
 drop policy if exists "admin write profiles" on profiles;
-create policy "admin write profiles" on profiles for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write profiles" on profiles for all to authenticated using (portfolio_private.is_portfolio_admin()) with check (portfolio_private.is_portfolio_admin());
 
 -- skill_groups
 drop policy if exists "public read published skills" on skill_groups;
-create policy "public read published skills" on skill_groups for select using (is_published = true or auth.role() = 'authenticated');
+create policy "public read published skills" on skill_groups for select to anon, authenticated using (is_published = true or portfolio_private.is_portfolio_admin());
 drop policy if exists "admin write skills" on skill_groups;
-create policy "admin write skills" on skill_groups for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write skills" on skill_groups for all to authenticated using (portfolio_private.is_portfolio_admin()) with check (portfolio_private.is_portfolio_admin());
 
 -- experience
 drop policy if exists "public read published experience" on experience;
-create policy "public read published experience" on experience for select using (is_published = true or auth.role() = 'authenticated');
+create policy "public read published experience" on experience for select to anon, authenticated using (is_published = true or portfolio_private.is_portfolio_admin());
 drop policy if exists "admin write experience" on experience;
-create policy "admin write experience" on experience for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write experience" on experience for all to authenticated using (portfolio_private.is_portfolio_admin()) with check (portfolio_private.is_portfolio_admin());
 
 -- projects
 drop policy if exists "public read published projects" on projects;
-create policy "public read published projects" on projects for select using (is_published = true or auth.role() = 'authenticated');
+create policy "public read published projects" on projects for select to anon, authenticated using (is_published = true or portfolio_private.is_portfolio_admin());
 drop policy if exists "admin write projects" on projects;
-create policy "admin write projects" on projects for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write projects" on projects for all to authenticated using (portfolio_private.is_portfolio_admin()) with check (portfolio_private.is_portfolio_admin());
 
 -- certificates
 drop policy if exists "public read published certificates" on certificates;
-create policy "public read published certificates" on certificates for select using (is_published = true or auth.role() = 'authenticated');
+create policy "public read published certificates" on certificates for select to anon, authenticated using (is_published = true or portfolio_private.is_portfolio_admin());
 drop policy if exists "admin write certificates" on certificates;
-create policy "admin write certificates" on certificates for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write certificates" on certificates for all to authenticated using (portfolio_private.is_portfolio_admin()) with check (portfolio_private.is_portfolio_admin());
 
 -- awards
 drop policy if exists "public read published awards" on awards;
-create policy "public read published awards" on awards for select using (is_published = true or auth.role() = 'authenticated');
+create policy "public read published awards" on awards for select to anon, authenticated using (is_published = true or portfolio_private.is_portfolio_admin());
 drop policy if exists "admin write awards" on awards;
-create policy "admin write awards" on awards for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write awards" on awards for all to authenticated using (portfolio_private.is_portfolio_admin()) with check (portfolio_private.is_portfolio_admin());
 
 -- cv_files
 drop policy if exists "public read active cv" on cv_files;
-create policy "public read active cv" on cv_files for select using (is_active = true or auth.role() = 'authenticated');
+create policy "public read active cv" on cv_files for select to anon, authenticated using (is_active = true or portfolio_private.is_portfolio_admin());
 drop policy if exists "admin write cv" on cv_files;
-create policy "admin write cv" on cv_files for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write cv" on cv_files for all to authenticated using (portfolio_private.is_portfolio_admin()) with check (portfolio_private.is_portfolio_admin());
 
 -- messages: public can submit, only admin can read/manage
 drop policy if exists "anyone can submit messages" on messages;
 create policy "anyone can submit messages" on messages for insert with check (true);
 drop policy if exists "admin read messages" on messages;
-create policy "admin read messages" on messages for select using (auth.role() = 'authenticated');
+create policy "admin read messages" on messages for select to authenticated using (portfolio_private.is_portfolio_admin());
 drop policy if exists "admin manage messages" on messages;
-create policy "admin manage messages" on messages for update using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin manage messages" on messages for update to authenticated using (portfolio_private.is_portfolio_admin()) with check (portfolio_private.is_portfolio_admin());
 drop policy if exists "admin delete messages" on messages;
-create policy "admin delete messages" on messages for delete using (auth.role() = 'authenticated');
+create policy "admin delete messages" on messages for delete to authenticated using (portfolio_private.is_portfolio_admin());
 
 -- media: admin-only in both directions (it's a private file library)
 drop policy if exists "admin read media" on media;
-create policy "admin read media" on media for select using (auth.role() = 'authenticated');
+create policy "admin read media" on media for select to authenticated using (portfolio_private.is_portfolio_admin());
 drop policy if exists "admin write media" on media;
-create policy "admin write media" on media for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+create policy "admin write media" on media for all to authenticated using (portfolio_private.is_portfolio_admin()) with check (portfolio_private.is_portfolio_admin());
 
 -- Seed a single empty profile row if none exists yet, so the admin
 -- "Profile/About" page always has one record to edit.
