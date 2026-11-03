@@ -32,7 +32,7 @@ test('does not treat whitespace or emoji as a configured symbol', () => {
 });
 
 test('accepts the symbol characters configured by Supabase Auth', () => {
-  const symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=', '[', ']', '{', '}', ';', "'", ':', '"', '|', '<', '>', '?', ',', '.', '/', '`', '~', '\\\\'];
+  const symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=', '[', ']', '{', '}', ';', "'", ':', '"', '|', '<', '>', '?', ',', '.', '/', '`', '~', String.fromCharCode(92)];
   for (const symbol of symbols) {
     assert.equal(isPasswordPolicySatisfied(`LongEnoughPassword7${symbol}`), true, `symbol ${symbol}`);
   }
