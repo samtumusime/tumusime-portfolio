@@ -7,7 +7,7 @@ import {
   isPasswordPolicySatisfied,
 } from '../lib/auth/passwordPolicy.mjs';
 
-test('requires at least 16 Unicode code points and all four character classes', () => {
+test('requires at least 16 characters and all configured character classes', () => {
   assert.equal(PASSWORD_MIN_LENGTH, 16);
   assert.equal(isPasswordPolicySatisfied('SufficientlyLong9!Pass'), true);
   assert.deepEqual(getPasswordPolicyErrors('SufficientlyLong9!Pass'), []);
@@ -16,14 +16,14 @@ test('requires at least 16 Unicode code points and all four character classes', 
 test('reports missing length and character classes', () => {
   assert.deepEqual(getPasswordPolicyErrors('short'), [
     'At least 16 characters',
-    'At least one uppercase letter',
-    'At least one number',
-    'At least one symbol or punctuation mark',
+    'At least one uppercase English letter (A-Z)',
+    'At least one number (0-9)',
+    'At least one supported symbol (for example ! or #)',
   ]);
 });
 
-test('does not treat whitespace as a symbol', () => {
-  const result = evaluatePasswordPolicy('LongEnoughPassword7 ');
+test('does not treat whitespace or emoji as a configured symbol', () => {
+  const result = evaluatePasswordPolicy('LongEnoughPassword7 🔒');
   assert.equal(result.length, true);
   assert.equal(result.lowercase, true);
   assert.equal(result.uppercase, true);
@@ -31,8 +31,18 @@ test('does not treat whitespace as a symbol', () => {
   assert.equal(result.symbol, false);
 });
 
-test('supports Unicode upper/lowercase letters, decimal digits, and symbols', () => {
-  assert.equal(isPasswordPolicySatisfied('ÄnderungPasswort٤🔒'), true);
+test('accepts Supabase-supported punctuation and symbol characters', () => {
+  for (const symbol of Array.from("!@#$%^&*()_+-=[]{};':\\"|<>?,./`~")) {
+    assert.equal(isPasswordPolicySatisfied(`LongEnoughPassword7${symbol}`), true, `symbol ${symbol}`);
+  }
+});
+
+test('requires English character classes rather than unrelated Unicode classes', () => {
+  const result = evaluatePasswordPolicy('ÄnderungPasswort٤🔒');
+  assert.equal(result.lowercase, false);
+  assert.equal(result.uppercase, false);
+  assert.equal(result.number, false);
+  assert.equal(result.symbol, false);
 });
 
 test('rejects non-string values safely', () => {
