@@ -4,6 +4,12 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_RULES,
+  evaluatePasswordPolicy,
+  getPasswordPolicyErrors,
+} from '@/lib/auth/passwordPolicy.mjs';
 
 export default function UpdatePasswordPage() {
   const [sessionState, setSessionState] = useState('loading');
@@ -12,6 +18,7 @@ export default function UpdatePasswordPage() {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const router = useRouter();
+  const passwordRuleStatus = evaluatePasswordPolicy(password);
 
   useEffect(() => {
     let active = true;
@@ -31,8 +38,9 @@ export default function UpdatePasswordPage() {
   async function handleSubmit(event) {
     event.preventDefault();
     setError('');
-    if (password.length < 12) {
-      setError('Use a password with at least 12 characters.');
+
+    if (getPasswordPolicyErrors(password).length > 0) {
+      setError('Choose a password that meets every requirement below.');
       return;
     }
     if (password !== confirmPassword) {
@@ -79,12 +87,21 @@ export default function UpdatePasswordPage() {
                 id="new-password"
                 type="password"
                 required
-                minLength={12}
+                minLength={PASSWORD_MIN_LENGTH}
+                maxLength={256}
                 autoComplete="new-password"
+                aria-describedby="password-requirements"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-md bg-surface border border-border text-sm focus:outline-none focus:border-gold transition-colors"
               />
+              <ul id="password-requirements" className="mt-3 space-y-1 text-xs text-muted">
+                {PASSWORD_RULES.map(({ key, label }) => (
+                  <li key={key} className={passwordRuleStatus[key] ? 'text-gold' : ''}>
+                    <span className="font-medium">{passwordRuleStatus[key] ? 'Met' : 'Required'}:</span> {label}
+                  </li>
+                ))}
+              </ul>
             </div>
             <div>
               <label htmlFor="confirm-password" className="block text-xs text-muted mb-1.5">Confirm new password</label>
@@ -92,7 +109,8 @@ export default function UpdatePasswordPage() {
                 id="confirm-password"
                 type="password"
                 required
-                minLength={12}
+                minLength={PASSWORD_MIN_LENGTH}
+                maxLength={256}
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}

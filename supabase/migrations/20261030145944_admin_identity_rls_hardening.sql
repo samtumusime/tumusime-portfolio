@@ -1,4 +1,4 @@
--- PROPOSAL ONLY. Do not apply until the owner approves this exact production DB change.
+-- Applied migration source; live Supabase records version 20261030145944.
 -- Project: tumusime-portfolio (uxtikyfojssnbwdjzald)
 -- This change does not insert/update/delete application rows or Storage objects.
 -- It binds the existing CMS identity to the sole currently observed Auth user ID.

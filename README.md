@@ -37,7 +37,8 @@ database; do not rerun them against the existing live project as part of this
 redesign. The live database already contains records and Storage objects.
 The owner-UID policy change was applied to the existing live project on
 2026-10-30 and passed its read-only post-check. It is versioned at
-`supabase/migrations/20261030165000_admin_identity_rls_hardening.sql`, with a
+`supabase/migrations/20261030145944_admin_identity_rls_hardening.sql`, matching
+the version recorded in live Supabase, with a
 companion rollback at `supabase/rollbacks/20261030_admin_identity_rls_hardening.sql`.
 Do not rerun setup scripts or this migration against the live project.
 
