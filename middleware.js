@@ -34,12 +34,14 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
   const isLoginRoute = pathname === '/login';
-  const isPasswordUpdateRoute = pathname === '/update-password';
 
   const adminUserId = process.env.ADMIN_USER_ID?.trim();
   const isAuthorizedAdmin = Boolean(user && adminUserId && user.id === adminUserId);
 
-  if ((isAdminRoute || isPasswordUpdateRoute) && !isAuthorizedAdmin) {
+  // The password-update page is intentionally outside the admin-only gate.
+  // Its client page verifies that a valid Supabase session exists before
+  // showing the form, and updateUser() can only change that session's password.
+  if (isAdminRoute && !isAuthorizedAdmin) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
     loginUrl.search = '';
