@@ -39,7 +39,7 @@ test('accepts the symbol characters configured by Supabase Auth', () => {
 });
 
 test('requires English character classes rather than unrelated Unicode classes', () => {
-  const result = evaluatePasswordPolicy('ÄnderungPasswort٤🔒');
+  const result = evaluatePasswordPolicy('ÄNDERUNG٤🔒');
   assert.equal(result.lowercase, false);
   assert.equal(result.uppercase, false);
   assert.equal(result.number, false);
