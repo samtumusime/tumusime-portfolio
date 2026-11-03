@@ -115,8 +115,15 @@ tests are later implementation work. Do not deploy without the owner's approval.
       unpublished portfolio rows and the private inbox are owner-restricted.
 - [x] Public/anon/authenticated execute access to the `SECURITY DEFINER`
       `rls_auto_enable()` RPC was revoked; the event trigger remains intact.
-- [ ] The revised `ADMIN_USER_ID` middleware, recovery callback and password
-      update UI are only in the local patch and have not been pushed/deployed.
+- [x] The revised `ADMIN_USER_ID` middleware, recovery callback and password
+      update UI are committed on `security/auth-hardening`; they are not deployed.
+- [ ] Before launch, configure Supabase Auth password strength to require at least
+      16 characters plus lowercase, uppercase, digits and symbols. The UI mirrors
+      these rules, but Supabase Auth must enforce them server-side.
+- [ ] Add the exact production and preview callback URLs ending in
+      `/auth/callback` to Supabase Auth's redirect URL allowlist, then test recovery.
+- [ ] Run the production build and complete login, recovery, password-change,
+      unauthorized-user and public-content smoke tests before merging/deploying.
 - [x] The live contact inbox has no public read policy; anti-spam/rate limits
       remain a later security task.
 - [ ] Leaked-password protection is currently disabled in Supabase Auth and
