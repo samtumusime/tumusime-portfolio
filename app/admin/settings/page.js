@@ -17,16 +17,20 @@ export default function AdminSettingsPage() {
   async function handleResetPassword() {
     setSending(true);
     setStatus(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined,
-    });
-    setSending(false);
-    setStatus(
-      error
-        ? { type: 'error', message: error.message }
-        : { type: 'success', message: `Password reset email sent to ${email}.` }
-    );
+    try {
+      const supabase = createClient();
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/update-password')}`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+      setStatus(
+        error
+          ? { type: 'error', message: 'Password recovery could not be started. Please try again.' }
+          : { type: 'success', message: 'If the account is eligible, password recovery instructions will be sent.' }
+      );
+    } catch {
+      setStatus({ type: 'error', message: 'Password recovery could not be started. Please try again.' });
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -59,10 +63,8 @@ export default function AdminSettingsPage() {
         <div>
           <h2 className="text-sm font-semibold mb-2">About this dashboard</h2>
           <p className="text-sm text-muted leading-relaxed">
-            This admin panel and the public site share the same Supabase database. Only the account above
-            (matching <code className="text-xs bg-surface-2 px-1.5 py-0.5 rounded">ADMIN_EMAIL</code> in your
-            environment variables) can sign in here — enforced by both route middleware and database
-            Row Level Security, not just by hiding the page.
+            The admin account must match the server-side <code className="text-xs bg-surface-2 px-1.5 py-0.5 rounded">ADMIN_USER_ID</code>
+            allowlist. Route middleware and database Row Level Security both enforce that identity; hiding this page is not an access control.
           </p>
         </div>
       </div>

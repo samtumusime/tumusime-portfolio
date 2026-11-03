@@ -1,8 +1,10 @@
 'use client';
 
 import { Suspense, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { safeAdminRedirect } from '@/lib/auth/safeRedirect.mjs';
 
 export default function LoginPage() {
   return (
@@ -24,15 +26,23 @@ function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (signInError) {
-      setError('Invalid email or password.');
-      return;
+    try {
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (signInError) {
+        setError('Sign-in failed. Check your credentials and try again.');
+        return;
+      }
+      router.replace(safeAdminRedirect(params.get('next')));
+      router.refresh();
+    } catch {
+      setError('Sign-in is temporarily unavailable. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    router.replace(params.get('next') || '/admin');
-    router.refresh();
   }
 
   return (
@@ -75,6 +85,11 @@ function LoginForm() {
           >
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
+          <div className="text-center">
+            <Link href="/forgot-password" className="text-xs text-muted hover:text-gold underline-offset-4 hover:underline">
+              Forgot password?
+            </Link>
+          </div>
         </form>
         <p className="text-center text-xs text-muted mt-6">
           Only the configured admin account can access the dashboard.
